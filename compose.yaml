@@ -1,0 +1,54 @@
+services:
+  app:
+    image: sample-mcp:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_BUILDER_IMAGE: python:alpine
+        PYTHON_RUNTIME_IMAGE: python:alpine
+    container_name: sample-mcp
+    environment:
+      MCP_TRANSPORT: streamable-http
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket,sys; s=socket.socket(); s.settimeout(2); ok=(s.connect_ex(('127.0.0.1', 8000))==0); s.close(); sys.exit(0 if ok else 1)",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  app-dhi:
+    image: sample-mcp-dhi:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_BUILDER_IMAGE: dhi.io/python:3.12-alpine3.23-dev
+        PYTHON_RUNTIME_IMAGE: dhi.io/python:3.12-alpine3.23
+    container_name: sample-mcp-dhi
+    environment:
+      MCP_TRANSPORT: streamable-http
+    ports:
+      - "8001:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket,sys; s=socket.socket(); s.settimeout(2); ok=(s.connect_ex(('127.0.0.1', 8000))==0); s.close(); sys.exit(0 if ok else 1)",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
